@@ -1,0 +1,53 @@
+===== Level 1 serial pipeline started at Sun Apr  5 12:42:50 PM +08 2026 =====
+Working directory: /nfs/home/svu/e1546946
+Node: CN-006
+Threads per step: 1
+===== Processing SRR24949775 at Sun Apr  5 12:42:50 PM +08 2026 =====
+[SRR24949775] FastQC: 302s
+[SRR24949775] fastp: 285s
+[SRR24949775] STAR: 2959s
+[SRR24949775] samtools: 48s
+[SRR24949775] featureCounts: 63s
+[SRR24949775] TOTAL: 3657s
+===== Finished SRR24949775 at Sun Apr  5 01:43:47 PM +08 2026 =====
+===== Processing SRR24949778 at Sun Apr  5 01:43:47 PM +08 2026 =====
+[SRR24949778] FastQC: 288s
+[SRR24949778] fastp: 276s
+[SRR24949778] STAR: 2648s
+[SRR24949778] samtools: 42s
+[SRR24949778] featureCounts: 57s
+[SRR24949778] TOTAL: 3311s
+===== Finished SRR24949778 at Sun Apr  5 02:38:58 PM +08 2026 =====
+===== Processing SRR24949781 at Sun Apr  5 02:38:58 PM +08 2026 =====
+[SRR24949781] FastQC: 280s
+[SRR24949781] fastp: 276s
+[SRR24949781] STAR: 2709s
+[SRR24949781] samtools: 46s
+[SRR24949781] featureCounts: 58s
+[SRR24949781] TOTAL: 3369s
+===== Finished SRR24949781 at Sun Apr  5 03:35:07 PM +08 2026 =====
+===== Processing SRR24949786 at Sun Apr  5 03:35:07 PM +08 2026 =====
+[SRR24949786] FastQC: 270s
+[SRR24949786] fastp: 269s
+[SRR24949786] STAR: 2578s
+[SRR24949786] samtools: 41s
+[SRR24949786] featureCounts: 54s
+[SRR24949786] TOTAL: 3212s
+===== Finished SRR24949786 at Sun Apr  5 04:28:39 PM +08 2026 =====
+===== Processing SRR24949787 at Sun Apr  5 04:28:39 PM +08 2026 =====
+[SRR24949787] FastQC: 268s
+[SRR24949787] fastp: 275s
+[SRR24949787] STAR: 2832s
+[SRR24949787] samtools: 46s
+[SRR24949787] featureCounts: 60s
+[SRR24949787] TOTAL: 3481s
+===== Finished SRR24949787 at Sun Apr  5 05:26:40 PM +08 2026 =====
+===== Processing SRR24949788 at Sun Apr  5 05:26:40 PM +08 2026 =====
+[SRR24949788] FastQC: 281s
+[SRR24949788] fastp: 269s
+[SRR24949788] STAR: 2563s
+[SRR24949788] samtools: 41s
+[SRR24949788] featureCounts: 55s
+[SRR24949788] TOTAL: 3209s
+===== Finished SRR24949788 at Sun Apr  5 06:20:09 PM +08 2026 =====
+===== ALL DONE. Total walltime: 20239s =====

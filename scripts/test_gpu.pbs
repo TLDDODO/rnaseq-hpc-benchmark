@@ -1,0 +1,9 @@
+#!/bin/bash
+#PBS -N test_gpu
+#PBS -q gpu
+#PBS -l select=1:ncpus=4:ngpus=1:mem=16gb
+#PBS -l walltime=00:10:00
+#PBS -j oe
+#PBS -o /scratch/e1546946/phm5004/logs/test_gpu.log
+
+nvidia-smi

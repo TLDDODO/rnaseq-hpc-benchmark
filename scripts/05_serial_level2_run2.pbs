@@ -1,0 +1,94 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N level2_run2
+#PBS -j oe
+#PBS -l walltime=10:00:00
+#PBS -l select=1:ncpus=8:mem=40gb
+#PBS -m ae
+#PBS -M e1546946@u.nus.edu.sg
+
+source /etc/profile
+set -euo pipefail
+
+module purge
+module load FastQC/0.12.1-Java-11
+module load fastp/0.23.2-GCC-11.3.0
+module load STAR/2.7.11b-GCC-11.3.0
+module load SAMtools/1.16.1-GCC-11.3.0
+module load Subread/2.0.4-GCC-11.3.0
+
+BASE=/scratch/e1546946/phm5004
+INDEX=$BASE/ref/star_index
+GTF=$BASE/ref/gtf/Homo_sapiens.GRCh38.109.gtf
+RAW=$BASE/data/raw
+TRIM=$BASE/data/trimmed_level2_run2
+ALIGN=$BASE/data/aligned_level2_run2
+COUNT=$BASE/data/counts_level2_run2
+QC=$BASE/qc/level2_fastqc_run2
+FASTP_QC=$BASE/qc/level2_fastp_run2
+TIMING=$BASE/results/timing_level2_run2.txt
+
+mkdir -p $TRIM $ALIGN $COUNT $QC $FASTP_QC $BASE/results
+
+SAMPLES=(
+  SRR24949775
+  SRR24949778
+  SRR24949781
+  SRR24949786
+  SRR24949787
+  SRR24949788
+)
+
+echo "===== Level 2 Run2 started at $(date) =====" | tee $TIMING
+echo "Threads per step: 8" | tee -a $TIMING
+TOTAL_START=$(date +%s)
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  echo "===== Processing ${SAMPLE} at $(date) =====" | tee -a $TIMING
+  SAMPLE_START=$(date +%s)
+
+  T1=$(date +%s)
+  fastqc $RAW/${SAMPLE}_1.fastq $RAW/${SAMPLE}_2.fastq -o $QC -t 8
+  T2=$(date +%s)
+  echo "[${SAMPLE}] FastQC: $((T2-T1))s" | tee -a $TIMING
+
+  T1=$(date +%s)
+  fastp \
+    -i $RAW/${SAMPLE}_1.fastq -I $RAW/${SAMPLE}_2.fastq \
+    -o $TRIM/${SAMPLE}_1.fastq -O $TRIM/${SAMPLE}_2.fastq \
+    -j $FASTP_QC/${SAMPLE}_fastp.json \
+    -h $FASTP_QC/${SAMPLE}_fastp.html \
+    -w 8
+  T2=$(date +%s)
+  echo "[${SAMPLE}] fastp: $((T2-T1))s" | tee -a $TIMING
+
+  T1=$(date +%s)
+  STAR \
+    --runThreadN 8 \
+    --genomeDir $INDEX \
+    --readFilesIn $TRIM/${SAMPLE}_1.fastq $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_
+  T2=$(date +%s)
+  echo "[${SAMPLE}] STAR: $((T2-T1))s" | tee -a $TIMING
+
+  T1=$(date +%s)
+  samtools index -@ 8 $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam
+  T2=$(date +%s)
+  echo "[${SAMPLE}] samtools: $((T2-T1))s" | tee -a $TIMING
+
+  T1=$(date +%s)
+  featureCounts -T 8 -p \
+    -a $GTF \
+    -o $COUNT/${SAMPLE}_counts.txt \
+    $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam
+  T2=$(date +%s)
+  echo "[${SAMPLE}] featureCounts: $((T2-T1))s" | tee -a $TIMING
+
+  SAMPLE_END=$(date +%s)
+  echo "[${SAMPLE}] TOTAL: $((SAMPLE_END-SAMPLE_START))s" | tee -a $TIMING
+  echo "===== Finished ${SAMPLE} at $(date) =====" | tee -a $TIMING
+done
+
+TOTAL_END=$(date +%s)
+echo "===== ALL DONE. Total walltime: $((TOTAL_END-TOTAL_START))s =====" | tee -a $TIMING

@@ -1,0 +1,17 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N download_test
+#PBS -j oe
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=2:mem=8gb
+
+module load SRA-Toolkit/3.0.10-gompi-2023a
+
+cd /scratch/e1546946/phm5004/data/raw
+
+fasterq-dump SRR24949788 \
+  --outdir /scratch/e1546946/phm5004/data/raw \
+  --temp /scratch/e1546946/phm5004/data/raw \
+  --threads 2 \
+  --split-files \
+  --progress

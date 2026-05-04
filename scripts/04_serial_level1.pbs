@@ -1,0 +1,121 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N level1_serial
+#PBS -j oe
+#PBS -l select=1:ncpus=8:mem=45gb
+#PBS -l walltime=16:00:00
+
+source /etc/profile
+set -euo pipefail
+
+module purge
+module load FastQC/0.12.1-Java-11
+module load fastp/0.23.2-GCC-11.3.0
+module load STAR/2.7.11b-GCC-11.3.0
+module load SAMtools/1.16.1-GCC-11.3.0
+module load Subread/2.0.4-GCC-11.3.0
+
+BASE=/scratch/e1546946/phm5004
+INDEX=$BASE/ref/star_index
+GTF=$BASE/ref/gtf/Homo_sapiens.GRCh38.109.gtf
+
+RAW=$BASE/data/raw
+TRIM=$BASE/data/trimmed_level1
+ALIGN=$BASE/data/aligned_level1
+COUNT=$BASE/data/counts_level1
+QC=$BASE/qc/level1_fastqc_raw
+FASTP_QC=$BASE/qc/level1_fastp
+TIMING=$BASE/results/timing_level1.txt
+
+mkdir -p $TRIM $ALIGN $COUNT $QC $FASTP_QC $BASE/results
+
+echo "===== Level 1 serial pipeline started at $(date) =====" | tee $TIMING
+echo "Working directory: $(pwd)" | tee -a $TIMING
+echo "Node: $(hostname)" | tee -a $TIMING
+echo "Threads per step: 1" | tee -a $TIMING
+
+TOTAL_START=$(date +%s)
+
+SAMPLES=(
+  SRR24949775
+  SRR24949778
+  SRR24949781
+  SRR24949786
+  SRR24949787
+  SRR24949788
+)
+
+for SAMPLE in "${SAMPLES[@]}"; do
+  echo "===== Processing ${SAMPLE} at $(date) =====" | tee -a $TIMING
+
+  [[ -f $RAW/${SAMPLE}_1.fastq ]] || { echo "Missing file: $RAW/${SAMPLE}_1.fastq" | tee -a $TIMING; exit 1; }
+  [[ -f $RAW/${SAMPLE}_2.fastq ]] || { echo "Missing file: $RAW/${SAMPLE}_2.fastq" | tee -a $TIMING; exit 1; }
+
+  SAMPLE_START=$(date +%s)
+
+  # Step 1: FastQC
+  T1=$(date +%s)
+  echo "[${SAMPLE}] Step 1: FastQC"
+  fastqc \
+    $RAW/${SAMPLE}_1.fastq \
+    $RAW/${SAMPLE}_2.fastq \
+    -o $QC \
+    -t 1
+  T2=$(date +%s)
+  echo "[${SAMPLE}] FastQC: $((T2-T1))s" | tee -a $TIMING
+
+  # Step 2: fastp
+  T1=$(date +%s)
+  echo "[${SAMPLE}] Step 2: fastp"
+  fastp \
+    -i $RAW/${SAMPLE}_1.fastq \
+    -I $RAW/${SAMPLE}_2.fastq \
+    -o $TRIM/${SAMPLE}_1.fastq \
+    -O $TRIM/${SAMPLE}_2.fastq \
+    -j $FASTP_QC/${SAMPLE}_fastp.json \
+    -h $FASTP_QC/${SAMPLE}_fastp.html \
+    -w 1
+  T2=$(date +%s)
+  echo "[${SAMPLE}] fastp: $((T2-T1))s" | tee -a $TIMING
+
+  # Step 3: STAR
+  T1=$(date +%s)
+  echo "[${SAMPLE}] Step 3: STAR"
+  STAR \
+    --runThreadN 1 \
+    --genomeDir $INDEX \
+    --readFilesIn \
+      $TRIM/${SAMPLE}_1.fastq \
+      $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_
+  T2=$(date +%s)
+  echo "[${SAMPLE}] STAR: $((T2-T1))s" | tee -a $TIMING
+
+  # Step 4: samtools index
+  T1=$(date +%s)
+  echo "[${SAMPLE}] Step 4: samtools index"
+  samtools index $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam
+  T2=$(date +%s)
+  echo "[${SAMPLE}] samtools: $((T2-T1))s" | tee -a $TIMING
+
+  # Step 5: featureCounts
+  T1=$(date +%s)
+  echo "[${SAMPLE}] Step 5: featureCounts"
+  featureCounts \
+    -T 1 \
+    -p \
+    -a $GTF \
+    -o $COUNT/${SAMPLE}_counts.txt \
+    $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam
+  T2=$(date +%s)
+  echo "[${SAMPLE}] featureCounts: $((T2-T1))s" | tee -a $TIMING
+
+  SAMPLE_END=$(date +%s)
+  echo "[${SAMPLE}] TOTAL: $((SAMPLE_END-SAMPLE_START))s" | tee -a $TIMING
+  echo "===== Finished ${SAMPLE} at $(date) =====" | tee -a $TIMING
+
+done
+
+TOTAL_END=$(date +%s)
+echo "===== ALL DONE. Total walltime: $((TOTAL_END-TOTAL_START))s =====" | tee -a $TIMING

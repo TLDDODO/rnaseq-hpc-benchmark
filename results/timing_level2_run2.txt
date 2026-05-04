@@ -1,0 +1,56 @@
+===== Level 2 Run2 started at Wed Apr  8 11:26:08 AM +08 2026 =====
+Threads per step: 8
+===== Processing SRR24949775 at Wed Apr  8 11:26:09 AM +08 2026 =====
+[SRR24949775] FastQC: 169s
+[SRR24949775] fastp: 85s
+[SRR24949775] STAR: 568s
+[SRR24949775] samtools: 9s
+[SRR24949775] featureCounts: 13s
+[SRR24949775] TOTAL: 844s
+===== Finished SRR24949775 at Wed Apr  8 11:40:13 AM +08 2026 =====
+===== Processing SRR24949778 at Wed Apr  8 11:40:13 AM +08 2026 =====
+[SRR24949778] FastQC: 157s
+[SRR24949778] fastp: 76s
+[SRR24949778] STAR: 500s
+[SRR24949778] samtools: 8s
+[SRR24949778] featureCounts: 12s
+[SRR24949778] TOTAL: 753s
+===== Finished SRR24949778 at Wed Apr  8 11:52:46 AM +08 2026 =====
+===== Processing SRR24949781 at Wed Apr  8 11:52:46 AM +08 2026 =====
+[SRR24949781] FastQC: 163s
+[SRR24949781] fastp: 110s
+[SRR24949781] STAR: 537s
+[SRR24949781] samtools: 9s
+[SRR24949781] featureCounts: 12s
+[SRR24949781] TOTAL: 831s
+===== Finished SRR24949781 at Wed Apr  8 12:06:37 PM +08 2026 =====
+===== Processing SRR24949786 at Wed Apr  8 12:06:37 PM +08 2026 =====
+[SRR24949786] FastQC: 154s
+[SRR24949786] fastp: 70s
+[SRR24949786] STAR: 468s
+[SRR24949786] samtools: 8s
+[SRR24949786] featureCounts: 11s
+[SRR24949786] TOTAL: 711s
+===== Finished SRR24949786 at Wed Apr  8 12:18:28 PM +08 2026 =====
+===== Processing SRR24949787 at Wed Apr  8 12:18:28 PM +08 2026 =====
+[SRR24949787] FastQC: 138s
+[SRR24949787] fastp: 70s
+===== Level 2 Run2 started at Wed Apr  8 06:58:47 PM +08 2026 =====
+Threads per step: 8
+===== Processing SRR24949787 at Wed Apr  8 06:58:47 PM +08 2026 =====
+[SRR24949787] FastQC: 145s
+[SRR24949787] fastp: 87s
+[SRR24949787] STAR: 608s
+[SRR24949787] samtools: 9s
+[SRR24949787] featureCounts: 15s
+[SRR24949787] TOTAL: 865s
+===== Finished SRR24949787 at Wed Apr  8 07:13:13 PM +08 2026 =====
+===== Processing SRR24949788 at Wed Apr  8 07:13:13 PM +08 2026 =====
+[SRR24949788] FastQC: 154s
+[SRR24949788] fastp: 98s
+[SRR24949788] STAR: 561s
+[SRR24949788] samtools: 8s
+[SRR24949788] featureCounts: 14s
+[SRR24949788] TOTAL: 836s
+===== Finished SRR24949788 at Wed Apr  8 07:27:09 PM +08 2026 =====
+===== ALL DONE. Total walltime: 1702s =====

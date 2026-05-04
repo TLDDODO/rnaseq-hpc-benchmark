@@ -1,0 +1,13 @@
+===== Bash parallel pipeline started at Thu Apr 16 10:35:53 AM +08 2026 =====
+Node: GN-A40-027
+===== Step 1: fastp parallel =====
+fastp all: 124s
+===== Step 2: STAR batch 1 =====
+STAR batch1: 578s
+===== Step 3: STAR batch 2 =====
+STAR batch2: 480s
+===== Step 4: samtools index =====
+samtools: 15s
+===== Step 5: featureCounts =====
+featureCounts: 22s
+===== ALL DONE. Total walltime: 1222s =====

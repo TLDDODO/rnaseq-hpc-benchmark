@@ -1,0 +1,101 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N bash_parallel
+#PBS -j oe
+#PBS -o /scratch/e1546946/phm5004/
+#PBS -l select=1:ncpus=24:mem=166gb
+#PBS -l walltime=04:00:00
+#PBS -m ae
+#PBS -M e1546946@u.nus.edu.sg
+
+source /etc/profile
+set -uo pipefail
+
+module purge
+module load fastp/0.23.2-GCC-11.3.0
+module load STAR/2.7.11b-GCC-11.3.0
+module load SAMtools/1.16.1-GCC-11.3.0
+module load Subread/2.0.4-GCC-11.3.0
+
+BASE=/scratch/e1546946/phm5004
+INDEX=$BASE/ref/star_index
+GTF=$BASE/ref/gtf/Homo_sapiens.GRCh38.109.gtf
+RAW=$BASE/data/raw
+TRIM=$BASE/data/trimmed_parallel
+ALIGN=$BASE/data/aligned_parallel
+COUNT=$BASE/data/counts_parallel
+FASTP_QC=$BASE/qc/parallel_fastp
+TIMING=$BASE/results/timing_parallel.txt
+
+mkdir -p $TRIM $ALIGN $COUNT $FASTP_QC $BASE/results
+
+SAMPLES=(SRR24949775 SRR24949778 SRR24949781 SRR24949786 SRR24949787 SRR24949788)
+
+echo "===== Bash parallel pipeline started at $(date) =====" | tee $TIMING
+echo "Node: $(hostname)" | tee -a $TIMING
+TOTAL_START=$(date +%s)
+
+T1=$(date +%s)
+echo "===== Step 1: fastp parallel =====" | tee -a $TIMING
+for SAMPLE in "${SAMPLES[@]}"; do
+  fastp \
+    -i $RAW/${SAMPLE}_1.fastq \
+    -I $RAW/${SAMPLE}_2.fastq \
+    -o $TRIM/${SAMPLE}_1.fastq \
+    -O $TRIM/${SAMPLE}_2.fastq \
+    -j $FASTP_QC/${SAMPLE}_fastp.json \
+    -h $FASTP_QC/${SAMPLE}_fastp.html \
+    -w 4 &
+done
+wait
+echo "fastp all: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+T1=$(date +%s)
+echo "===== Step 2: STAR batch 1 =====" | tee -a $TIMING
+for SAMPLE in SRR24949775 SRR24949778 SRR24949781; do
+  STAR \
+    --runThreadN 8 \
+    --genomeDir $INDEX \
+    --readFilesIn $TRIM/${SAMPLE}_1.fastq $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_ &
+done
+wait
+echo "STAR batch1: $(($(date +%s)-T1))s" | tee -a $TIMING
+rm -f $TRIM/SRR24949775_*.fastq $TRIM/SRR24949778_*.fastq $TRIM/SRR24949781_*.fastq
+
+T1=$(date +%s)
+echo "===== Step 3: STAR batch 2 =====" | tee -a $TIMING
+for SAMPLE in SRR24949786 SRR24949787 SRR24949788; do
+  STAR \
+    --runThreadN 8 \
+    --genomeDir $INDEX \
+    --readFilesIn $TRIM/${SAMPLE}_1.fastq $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_ &
+done
+wait
+echo "STAR batch2: $(($(date +%s)-T1))s" | tee -a $TIMING
+rm -f $TRIM/SRR24949786_*.fastq $TRIM/SRR24949787_*.fastq $TRIM/SRR24949788_*.fastq
+
+T1=$(date +%s)
+echo "===== Step 4: samtools index =====" | tee -a $TIMING
+for SAMPLE in "${SAMPLES[@]}"; do
+  samtools index -@ 4 $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam &
+done
+wait
+echo "samtools: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+T1=$(date +%s)
+echo "===== Step 5: featureCounts =====" | tee -a $TIMING
+featureCounts \
+  -T 24 \
+  -p \
+  -a $GTF \
+  -o $COUNT/all_counts.txt \
+  $ALIGN/*_Aligned.sortedByCoord.out.bam
+echo "featureCounts: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+TOTAL_END=$(date +%s)
+echo "===== ALL DONE. Total walltime: $((TOTAL_END-TOTAL_START))s =====" | tee -a $TIMING
+EOF

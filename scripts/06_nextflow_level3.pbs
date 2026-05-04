@@ -1,0 +1,20 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N nf_rnaseq
+#PBS -j oe
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=24:mem=200gb
+#PBS -m ae
+#PBS -M e1546946@u.nus.edu.sg
+
+cd /scratch/e1546946/phm5004/nextflow
+
+module load Nextflow/24.04.2
+
+START=$(date +%s)
+echo "===== Level 3 Nextflow 24core started at $(date) =====" | tee /scratch/e1546946/phm5004/results/timing_level3_24core.txt
+
+nextflow run main.nf
+
+END=$(date +%s)
+echo "===== ALL DONE. Total walltime: $((END-START))s =====" | tee -a /scratch/e1546946/phm5004/results/timing_level3_24core.txt

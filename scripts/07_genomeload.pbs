@@ -1,0 +1,127 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N genomeload
+#PBS -j oe
+#PBS -l select=1:ncpus=24:mem=100gb
+#PBS -l walltime=04:00:00
+#PBS -m ae
+#PBS -M e1546946@u.nus.edu.sg
+
+source /etc/profile
+set -uo pipefail
+
+module purge
+module load fastp/0.23.2-GCC-11.3.0
+module load STAR/2.7.11b-GCC-11.3.0
+module load SAMtools/1.16.1-GCC-11.3.0
+module load Subread/2.0.4-GCC-11.3.0
+
+BASE=/scratch/e1546946/phm5004
+INDEX=$BASE/ref/star_index
+GTF=$BASE/ref/gtf/Homo_sapiens.GRCh38.109.gtf
+RAW=$BASE/data/raw
+TRIM=$BASE/data/trimmed_genomeload
+ALIGN=$BASE/data/aligned_genomeload
+COUNT=$BASE/data/counts_genomeload
+FASTP_QC=$BASE/qc/genomeload_fastp
+TMPDIR=$BASE/data/genomeload_tmp
+TIMING=$BASE/results/timing_genomeload.txt
+
+mkdir -p $TRIM $ALIGN $COUNT $FASTP_QC $TMPDIR $BASE/results
+
+SAMPLES=(SRR24949775 SRR24949778 SRR24949781 SRR24949786 SRR24949787 SRR24949788)
+
+echo "===== GenomeLoad pipeline started at $(date) =====" | tee $TIMING
+echo "Node: $(hostname)" | tee -a $TIMING
+echo "Shared memory settings:" | tee -a $TIMING
+ipcs -lm | tee -a $TIMING
+TOTAL_START=$(date +%s)
+
+# Step 1: fastp 6并行
+T1=$(date +%s)
+echo "===== Step 1: fastp parallel =====" | tee -a $TIMING
+for SAMPLE in "${SAMPLES[@]}"; do
+  fastp \
+    -i $RAW/${SAMPLE}_1.fastq \
+    -I $RAW/${SAMPLE}_2.fastq \
+    -o $TRIM/${SAMPLE}_1.fastq \
+    -O $TRIM/${SAMPLE}_2.fastq \
+    -j $FASTP_QC/${SAMPLE}_fastp.json \
+    -h $FASTP_QC/${SAMPLE}_fastp.html \
+    -w 4 &
+done
+wait
+echo "fastp all: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+# Step 2: 预载基因组
+T1=$(date +%s)
+echo "===== Step 2: genome load =====" | tee -a $TIMING
+STAR --genomeLoad LoadAndExit \
+     --genomeDir $INDEX \
+     --outFileNamePrefix $TMPDIR/load_
+if [ $? -ne 0 ]; then
+    echo "FATAL: GenomeLoad failed, aborting" | tee -a $TIMING
+    exit 1
+fi
+echo "genome load: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+# Step 3: STAR batch 1
+T1=$(date +%s)
+echo "===== Step 3: STAR batch 1 =====" | tee -a $TIMING
+for SAMPLE in SRR24949775 SRR24949778 SRR24949781; do
+  STAR \
+    --runThreadN 4 \
+    --genomeDir $INDEX \
+    --genomeLoad LoadAndKeep \
+    --readFilesIn $TRIM/${SAMPLE}_1.fastq $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_ &
+done
+wait
+echo "STAR batch1: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+# Step 4: STAR batch 2
+T1=$(date +%s)
+echo "===== Step 4: STAR batch 2 =====" | tee -a $TIMING
+for SAMPLE in SRR24949786 SRR24949787 SRR24949788; do
+  STAR \
+    --runThreadN 4 \
+    --genomeDir $INDEX \
+    --genomeLoad LoadAndKeep \
+    --readFilesIn $TRIM/${SAMPLE}_1.fastq $TRIM/${SAMPLE}_2.fastq \
+    --outSAMtype BAM SortedByCoordinate \
+    --outFileNamePrefix $ALIGN/${SAMPLE}_ &
+done
+wait
+echo "STAR batch2: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+# Step 5: 清理共享内存
+STAR --genomeLoad Remove \
+     --genomeDir $INDEX \
+     --outFileNamePrefix $TMPDIR/remove_
+
+# 删除 trimmed 节省空间
+rm -f $TRIM/*.fastq
+
+# Step 6: samtools index 6并行
+T1=$(date +%s)
+echo "===== Step 5: samtools index =====" | tee -a $TIMING
+for SAMPLE in "${SAMPLES[@]}"; do
+  samtools index -@ 4 $ALIGN/${SAMPLE}_Aligned.sortedByCoord.out.bam &
+done
+wait
+echo "samtools: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+# Step 7: featureCounts
+T1=$(date +%s)
+echo "===== Step 6: featureCounts =====" | tee -a $TIMING
+featureCounts \
+  -T 24 \
+  -p \
+  -a $GTF \
+  -o $COUNT/all_counts.txt \
+  $ALIGN/*_Aligned.sortedByCoord.out.bam
+echo "featureCounts: $(($(date +%s)-T1))s" | tee -a $TIMING
+
+TOTAL_END=$(date +%s)
+echo "===== ALL DONE. Total walltime: $((TOTAL_END-TOTAL_START))s =====" | tee -a $TIMING

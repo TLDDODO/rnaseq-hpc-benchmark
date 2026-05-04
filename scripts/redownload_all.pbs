@@ -1,0 +1,25 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N redownload_all
+#PBS -j oe
+#PBS -l walltime=08:00:00
+#PBS -l select=1:ncpus=4:mem=16gb
+#PBS -m ae
+#PBS -M e1546946@u.nus.edu.sg
+
+module load SRA-Toolkit/3.0.10-gompi-2023a
+
+cd /scratch/e1546946/phm5004/data/raw
+
+SAMPLES="SRR24949775 SRR24949778 SRR24949781 SRR24949786 SRR24949787 SRR24949788"
+
+for SRR in $SAMPLES; do
+    echo "$(date) Downloading $SRR ..."
+    fasterq-dump $SRR \
+        --outdir /scratch/e1546946/phm5004/data/raw \
+        --temp /scratch/e1546946/phm5004/data/raw \
+        --threads 4 \
+        --split-files \
+        --progress
+    echo "$(date) Done: $SRR"
+done

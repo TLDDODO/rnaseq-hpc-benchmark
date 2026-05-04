@@ -1,0 +1,12 @@
+data/
+ref/
+nextflow/work/
+nextflow/.nextflow/
+*.fastq
+*.bam
+*.bai
+*.fa
+*.gtf
+*.o[0-9]*
+__pycache__/
+.nextflow*

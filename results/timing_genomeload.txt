@@ -1,0 +1,14 @@
+===== GenomeLoad pipeline started at Sat Apr 11 01:22:47 PM +08 2026 =====
+Node: CN-017
+Shared memory settings:
+
+------ Shared Memory Limits --------
+max number of segments = 20960
+max seg size (kbytes) = 4194304
+max total shared memory (kbytes) = 17179869184
+min seg size (bytes) = 1
+
+===== Step 1: fastp parallel =====
+fastp all: 161s
+===== Step 2: genome load =====
+FATAL: GenomeLoad failed, aborting

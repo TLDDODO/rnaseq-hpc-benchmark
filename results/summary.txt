@@ -1,0 +1,9 @@
+Pipeline Benchmark Summary
+==========================
+L1 Serial (1T):      Run1=20239s Run2=20830s Run3=21320s Mean=20796s SD=542s
+L2 Multicore (8T):   Run1=4171s  Run2=4840s  Run3=4702s  Mean=4571s  SD=347s
+L3 NF 24core:        Run1=1308s  Run2=1380s  Run3=1328s  Mean=1339s  SD=36s
+L3 NF 48core:        Run1=861s   Run2=864s   Run3=803s   Mean=843s   SD=32s
+NF scratch 24core:   Run1=1203s  Run2=1092s  Run3=1108s  Mean=1134s  SD=60s
+Bash parallel 24core:Run1=1321s  Run2=1241s  Run3=1222s  Mean=1261s  SD=52s
+GenomeLoad Atlas9:   Run1=5692s  Run2=12200s Run3=8734s  Mean=8875s  SD=3267s

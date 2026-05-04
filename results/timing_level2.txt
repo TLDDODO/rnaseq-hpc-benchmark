@@ -1,0 +1,51 @@
+===== Level 2 serial pipeline started at Mon Apr  6 10:13:03 AM +08 2026 =====
+Threads per step: 8
+===== Processing SRR24949775 at Mon Apr  6 10:13:03 AM +08 2026 =====
+[SRR24949775] FastQC: 165s
+[SRR24949775] fastp: 74s
+[SRR24949775] STAR: 543s
+[SRR24949775] samtools: 10s
+[SRR24949775] featureCounts: 15s
+[SRR24949775] TOTAL: 807s
+===== Finished SRR24949775 at Mon Apr  6 10:25:40 AM +08 2026 =====
+===== Processing SRR24949778 at Mon Apr  6 10:25:40 AM +08 2026 =====
+[SRR24949778] FastQC: 147s
+[SRR24949778] fastp: 68s
+[SRR24949778] STAR: 450s
+[SRR24949778] samtools: 9s
+[SRR24949778] featureCounts: 13s
+[SRR24949778] TOTAL: 687s
+===== Finished SRR24949778 at Mon Apr  6 10:37:08 AM +08 2026 =====
+===== Processing SRR24949781 at Mon Apr  6 10:37:08 AM +08 2026 =====
+[SRR24949781] FastQC: 152s
+[SRR24949781] fastp: 68s
+[SRR24949781] STAR: 447s
+[SRR24949781] samtools: 8s
+[SRR24949781] featureCounts: 14s
+[SRR24949781] TOTAL: 689s
+===== Finished SRR24949781 at Mon Apr  6 10:48:37 AM +08 2026 =====
+===== Processing SRR24949786 at Mon Apr  6 10:48:37 AM +08 2026 =====
+[SRR24949786] FastQC: 135s
+[SRR24949786] fastp: 63s
+[SRR24949786] STAR: 428s
+[SRR24949786] samtools: 8s
+[SRR24949786] featureCounts: 13s
+[SRR24949786] TOTAL: 647s
+===== Finished SRR24949786 at Mon Apr  6 10:59:24 AM +08 2026 =====
+===== Processing SRR24949787 at Mon Apr  6 10:59:24 AM +08 2026 =====
+[SRR24949787] FastQC: 156s
+[SRR24949787] fastp: 65s
+[SRR24949787] STAR: 451s
+[SRR24949787] samtools: 9s
+[SRR24949787] featureCounts: 13s
+[SRR24949787] TOTAL: 694s
+===== Finished SRR24949787 at Mon Apr  6 11:10:58 AM +08 2026 =====
+===== Processing SRR24949788 at Mon Apr  6 11:10:58 AM +08 2026 =====
+[SRR24949788] FastQC: 136s
+[SRR24949788] fastp: 60s
+[SRR24949788] STAR: 428s
+[SRR24949788] samtools: 8s
+[SRR24949788] featureCounts: 14s
+[SRR24949788] TOTAL: 646s
+===== Finished SRR24949788 at Mon Apr  6 11:21:44 AM +08 2026 =====
+===== ALL DONE. Total walltime: 4171s =====

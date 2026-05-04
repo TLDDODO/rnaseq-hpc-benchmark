@@ -1,0 +1,64 @@
+#!/bin/bash
+#PBS -P personal-e1546946
+#PBS -N test_one_sample
+#PBS -j oe
+#PBS -l walltime=04:00:00
+#PBS -l select=1:ncpus=8:mem=50gb
+source /etc/profile
+set -euo pipefail
+module purge
+module load FastQC/0.12.1-Java-11
+module load fastp/0.23.2-GCC-11.3.0
+module load STAR/2.7.11b-GCC-11.3.0
+module load SAMtools/1.16.1-GCC-11.3.0
+module load Subread/2.0.4-GCC-11.3.0
+
+BASE=/scratch/e1546946/phm5004
+SAMPLE=SRR24949788
+INDEX=$BASE/ref/star_index
+GTF=$BASE/ref/gtf/Homo_sapiens.GRCh38.109.gtf
+
+mkdir -p $BASE/qc/fastqc_raw
+mkdir -p $BASE/data/trimmed
+mkdir -p $BASE/data/aligned
+mkdir -p $BASE/data/counts
+
+echo "Step 1: FastQC"
+fastqc \
+  $BASE/data/raw/${SAMPLE}_1.fastq \
+  $BASE/data/raw/${SAMPLE}_2.fastq \
+  -o $BASE/qc/fastqc_raw \
+  -t 8
+
+echo "Step 2: fastp"
+fastp \
+  -i $BASE/data/raw/${SAMPLE}_1.fastq \
+  -I $BASE/data/raw/${SAMPLE}_2.fastq \
+  -o $BASE/data/trimmed/${SAMPLE}_1.fastq \
+  -O $BASE/data/trimmed/${SAMPLE}_2.fastq \
+  -j $BASE/qc/${SAMPLE}_fastp.json \
+  -h $BASE/qc/${SAMPLE}_fastp.html \
+  -w 8
+
+echo "Step 3: STAR"
+STAR \
+  --runThreadN 8 \
+  --genomeDir $INDEX \
+  --readFilesIn \
+    $BASE/data/trimmed/${SAMPLE}_1.fastq \
+    $BASE/data/trimmed/${SAMPLE}_2.fastq \
+  --outSAMtype BAM SortedByCoordinate \
+  --outFileNamePrefix $BASE/data/aligned/${SAMPLE}_
+
+echo "Step 4: samtools index"
+samtools index $BASE/data/aligned/${SAMPLE}_Aligned.sortedByCoord.out.bam
+
+echo "Step 5: featureCounts"
+featureCounts \
+  -T 8 \
+  -p \
+  -a $GTF \
+  -o $BASE/data/counts/${SAMPLE}_counts.txt \
+  $BASE/data/aligned/${SAMPLE}_Aligned.sortedByCoord.out.bam
+
+echo "Pipeline finished"
