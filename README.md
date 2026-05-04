@@ -98,6 +98,7 @@ Gap between theoretical and observed speedup is explained by:
 
 ## Repository Structure
 
+```
 ├── scripts/
 │   ├── 00_build_star_index.pbs      # Build STAR genome index
 │   ├── 04_serial_level1.pbs         # L1: Serial 1-thread baseline (~5.8h)
@@ -112,3 +113,4 @@ Gap between theoretical and observed speedup is explained by:
 │   ├── trace_nf_scratch.txt         # Nextflow per-process trace
 │   └── summary.txt                  # Aggregated benchmark summary
 └── README.md
+```
