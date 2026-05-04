@@ -86,7 +86,10 @@ Gap between theoretical and observed speedup is explained by:
 **Conclusion**: GenomeLoad requires Atlas9, but Atlas9's higher NFS latency negates the genome-loading benefit. For NFS-based clusters, sample-level parallelism (Nextflow/Bash) is more effective than shared memory optimization.
 
 ## Repository Structure
-├── scripts/          # PBS job scripts for each pipeline version
-├── nextflow/         # Nextflow pipeline (main.nf, nextflow.config)
-├── results/          # Timing data (3 runs each) and trace files
+
+```
+├── scripts/     # PBS job scripts for each pipeline version
+├── nextflow/    # Nextflow pipeline (main.nf, nextflow.config)
+├── results/     # Timing data (3 runs each) and trace files
 └── README.md
+```
