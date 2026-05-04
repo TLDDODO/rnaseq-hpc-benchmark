@@ -51,6 +51,17 @@ This project benchmarks multiple optimization strategies for a bulk RNA-seq anal
 4. **Bash parallel vs Nextflow**: nearly identical performance (1261s vs 1134s), showing that for single-node workloads, bash parallelism can match workflow managers.
 5. **GenomeLoad on Atlas9**: despite loading genome only once, overall performance was slower than Nextflow on Vanda due to Atlas9's higher NFS latency and node contention.
 
+## Data Quality (MultiQC)
+
+| Metric | Range | Assessment |
+|--------|-------|------------|
+| STAR uniquely mapped | 91.3% – 94.6% | Excellent (>90%) |
+| featureCounts assigned | 72.9% – 76.8% | Normal for bulk RNA-seq |
+| fastp pass filter | 98.9% – 99.2% | High quality raw data |
+| Duplication rate | 13.6% – 18.9% | Normal range |
+
+All pipeline versions produce identical biological results — optimization affects runtime only, not output quality.
+
 ## Amdahl's Law Analysis
 
 Serial fraction (featureCounts only) ≈ 60/20796 ≈ 0.3%
