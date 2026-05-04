@@ -3,7 +3,7 @@
 ## Overview
 
 This project benchmarks multiple optimization strategies for a bulk RNA-seq analysis pipeline on NUS HPC clusters (Vanda and Atlas9). Starting from a 5.8-hour serial baseline, we systematically explored multi-threading, sample-level parallelism, workflow management (Nextflow), shared memory genome loading (GenomeLoad), and NFS-aware I/O optimization.
-
+![Benchmark Results](results/benchmark_plot.png)
 **Key result: 20796s → 843s, 24.7× speedup**
 
 ## Dataset
