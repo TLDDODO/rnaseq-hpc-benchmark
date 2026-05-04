@@ -98,9 +98,17 @@ Gap between theoretical and observed speedup is explained by:
 
 ## Repository Structure
 
-```
-├── scripts/     # PBS job scripts for each pipeline version
-├── nextflow/    # Nextflow pipeline (main.nf, nextflow.config)
-├── results/     # Timing data (3 runs each) and trace files
+├── scripts/
+│   ├── 00_build_star_index.pbs      # Build STAR genome index
+│   ├── 04_serial_level1.pbs         # L1: Serial 1-thread baseline (~5.8h)
+│   ├── 05_serial_level2.pbs         # L2: Multicore 8-thread serial (~1.3h)
+│   ├── 08_bash_parallel.pbs         # Bash sample-level parallel (~21min)
+│   └── run_nf.pbs                   # Nextflow pipeline submission
+├── nextflow/
+│   ├── main.nf                      # Nextflow DSL2 pipeline
+│   └── nextflow.config              # Executor config (scratch mode enabled)
+├── results/
+│   ├── timing_*.txt                 # Per-run timing data (3 runs each)
+│   ├── trace_nf_scratch.txt         # Nextflow per-process trace
+│   └── summary.txt                  # Aggregated benchmark summary
 └── README.md
-```
